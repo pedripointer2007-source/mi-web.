@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Gamer - Clientes y Trabajos</title>
+  <style>
+    :root {
+      --panel: rgba(10, 15, 30, 0.92);
+      --text: #eaf2ff;
+      --muted: #9db0d0;
+      --accent: #00e5ff;
+      --accent2: #ff00d4;
+      --danger: #ff4d6d;
+      --shadow: 0 0 18px rgba(0,229,255,.25), 0 0 30px rgba(255,0,212,.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(0,229,255,0.12), transparent 25%),
+        radial-gradient(circle at top right, rgba(255,0,212,0.12), transparent 25%),
+        radial-gradient(circle at bottom center, rgba(124,255,0,0.08), transparent 30%),
+        linear-gradient(135deg, #050816, #0a1020 45%, #050816);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    .rgb-border {
+      position: relative;
+      border: 1px solid transparent;
+      background: linear-gradient(var(--panel), var(--panel)) padding-box,
+                  linear-gradient(90deg, #00e5ff, #ff00d4, #7cff00, #00e5ff) border-box;
+      box-shadow: var(--shadow);
+      animation: glowShift 6s linear infinite;
+    }
+
+    @keyframes glowShift {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+
+    .login-screen, .app-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .hidden { display: none !important; }
+
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 28px;
+      border-radius: 18px;
+      background: rgba(10,15,30,0.95);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+    }
+
+    .login-card h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 28px;
+      text-shadow: 0 0 12px var(--accent);
+    }
+
+    .login-card p {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .input-group { margin-bottom: 14px; }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #cfe4ff;
+    }
+
+    .input-group input, .input-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: white;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    .input-group input:focus, .input-group textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.15);
+    }
+
+    .btn {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      transition: 0.25s;
+    }
+
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+    .btn-secondary { background: linear-gradient(90deg, #1f2a44, #2c3b63); }
+    .btn-success { background: linear-gradient(90deg, #00b894, #00e5ff); }
+    .btn-danger { background: linear-gradient(90deg, #d63031, #ff4d6d); }
+
+    .app-container {
+      width: min(1400px, 100%);
+      min-height: calc(100vh - 40px);
+      margin: 20px auto;
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(6,10,20,0.92);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: linear-gradient(90deg, rgba(0,229,255,0.12), rgba(255,0,212,0.10), rgba(124,255,0,0.10));
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px var(--accent);
+    }
+
+    .navbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      background: linear-gradient(90deg, rgba(0,229,255,0.25), rgba(255,0,212,0.25));
+    }
+
+    .content { padding: 22px; }
+
+    .section { display: none; animation: fadeIn 0.35s ease; }
+    .section.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-card {
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      margin-bottom: 14px;
+      color: #fff;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 14px;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-align: left;
+      color: #e9f1ff;
+      vertical-align: top;
+    }
+
+    th {
+      background: rgba(255,255,255,0.05);
+      color: #bfe5ff;
+    }
+
+    tr:hover td { background: rgba(255,255,255,0.03); }
+
+    .small { font-size: 13px; color: var(--muted); }
+
+    .services-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .service-item {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .service-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .quantity-box {
+      width: 90px;
+    }
+
+    .service-summary {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(0,229,255,0.08);
+      border: 1px solid rgba(0,229,255,0.15);
+      color: #dffcff;
+      line-height: 1.6;
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    @media (max-width: 760px) {
+      .topbar { justify-content: center; }
+      .brand { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card rgb-border">
+      <h1>INICIO DE SESIÓN</h1>
+      <p>Acceso al panel gamer profesional</p>
+
+      <div class="input-group">
+        <label>Usuario</label>
+        <input type="text" id="loginUser" placeholder="Ingrese usuario">
+      </div>
+
+      <div class="input-group">
+        <label>Contraseña</label>
+        <input type="password" id="loginPass" placeholder="Ingrese contraseña">
+      </div>
+
+      <button class="btn btn-primary" style="width:100%" onclick="login()">Entrar</button>
+      <p class="small" id="loginMsg" style="margin-top:12px;"></p>
+    </div>
+  </div>
+
+  <div class="app-screen hidden" id="appScreen">
+    <div class="app-container rgb-border">
+      <div class="topbar">
+        <div class="brand">⚡ PANEL GAMER - SERVICIOS Y CLIENTES</div>
+        <div class="navbar">
+          <button class="nav-btn active" onclick="showSection('clientes', this)">Clientes</button>
+          <button class="nav-btn" onclick="showSection('servicios', this)">Servicios</button>
+          <button class="nav-btn" onclick="showSection('fecha', this)">Fecha</button>
+          <button class="nav-btn" onclick="showSection('trabajos', this)">Trabajos</button>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="section active" id="clientes">
+          <div class="section-card">
+            <div class="row-actions" style="margin-bottom:14px;">
+              <button class="btn btn-success" onclick="nuevoCliente()">Nuevo cliente</button>
+              <button class="btn btn-secondary" onclick="guardarCliente()">Guardar cliente</button>
+            </div>
+
+            <div class="grid">
+              <div class="input-group">
+                <label>ID único</label>
+                <input type="text" id="clienteId" readonly>
+              </div>
+              <div class="input-group">
+                <label>Nombre</label>
+                <input type="text" id="clienteNombre" disabled>
+              </div>
+              <div class="input-group">
+                <label>Apellido</label>
+                <input type="text" id="clienteApellido" disabled>
+              </div>
+              <div class="input-group">
+                <label>Número telefónico</label>
+                <input type="text" id="clienteTelefono" disabled>
+              </div>
+            </div>
+
+            <div class="input-group" style="margin-top:14px;">
+              <label>Descripción del servicio</label>
+              <textarea id="clienteDescripcion" rows="4" disabled></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" id="servicios">
+          <div class="section-card">
+            <h2 class="section-title">Servicios disponibles</h2>
+            <div class="services-list" id="servicesList"></div>
+            <div style="margin-top:14px;">
+              <button class="btn btn-success" onclick="guardarServicios()">Guardar servicios</button>
+            </div>
+            <div class="service-summary" id="serviceSummary">Todavía no has guardado servicios.</div>
+          </div>
+        </div>
+
+        <div class="section" id="fecha">
+          <div class="section-card">
+            <h2 class="section-title">Fechas del trabajo</h2>
+            <div class="grid">
+              <div class="input-group">
+                <label>Fecha de inicio</label>
+                <input type="date" id="fechaInicio">
+              </div>
+              <div class="input-group">
+                <label>Fecha final establecida</label>
+                <input type="date" id="fechaFinal">
+              </div>
+            </div>
+            <div style="margin-top:14px;">
+              <button class="btn btn-secondary" onclick="guardarFechas()">Guardar fechas</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" id="trabajos">
+          <div class="section-card">
+            <h2 class="section-title">Resumen de trabajos guardados</h2>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Servicio</th>
+                    <th>Cantidad</th>
+                    <th>Precio unitario</th>
+                    <th>Total</th>
+                    <th>Fechas</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="jobsTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const USER = "valverdezapata";
+    const PASS = "45.30.38";
+    const SERVICES = [
+      { name: "Ofimática", price: 20 },
+      { name: "Cable", price: 13 },
+      { name: "Crimpadora", price: 600 },
+      { name: "Tester", price: 600 },
+      { name: "Jack RJ45", price: 11 },
+      { name: "Flayer", price: 200 },
+      { name: "Packet Tracer", price: 60 },
+      { name: "Video", price: 0 }
+    ];
+
+    let clients = JSON.parse(localStorage.getItem("clients")) || [];
+    let currentId = null;
+    let currentServiceData = [];
+    let currentDates = { inicio: "", final: "" };
+
+    function saveAll() {
+      localStorage.setItem("clients", JSON.stringify(clients));
+    }
+
+    function login() {
+      const u = document.getElementById("loginUser").value.trim();
+      const p = document.getElementById("loginPass").value.trim();
+      const msg = document.getElementById("loginMsg");
+
+      if (u === USER && p === PASS) {
+        document.getElementById("loginScreen").classList.add("hidden");
+        document.getElementById("appScreen").classList.remove("hidden");
+        renderServices();
+        renderJobs();
+        resetClientForm();
+        return;
+      }
+
+      msg.textContent = "Usuario o contraseña incorrectos.";
+      msg.style.color = "#ff7b9d";
+    }
+
+    function showSection(id, btn) {
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+      document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    function nuevoCliente() {
+      currentId = Date.now().toString();
+      document.getElementById("clienteId").value = currentId;
+      document.getElementById("clienteNombre").disabled = false;
+      document.getElementById("clienteApellido").disabled = false;
+      document.getElementById("clienteTelefono").disabled = false;
+      document.getElementById("clienteDescripcion").disabled = false;
+
+      document.getElementById("clienteNombre").value = "";
+      document.getElementById("clienteApellido").value = "";
+      document.getElementById("clienteTelefono").value = "";
+      document.getElementById("clienteDescripcion").value = "";
+
+      currentServiceData = [];
+      currentDates = { inicio: "", final: "" };
+      clearServiceInputs();
+      document.getElementById("fechaInicio").value = "";
+      document.getElementById("fechaFinal").value = "";
+      renderServiceSummary();
+    }
+
+    function renderServices() {
+      const box = document.getElementById("servicesList");
+      box.innerHTML = "";
+
+      SERVICES.forEach((s, i) => {
+        const priceInput = s.name === "Video"
+          ? `<input type="number" id="videoPrice" class="quantity-box" placeholder="Precio" min="0" value="0">`
+          : `<span>₡ ${s.price}</span>`;
+
+        box.innerHTML += `
+          <div class="service-item">
+            <div class="service-top">
+              <div>
+                <strong>${s.name}</strong>
+                <div class="small">Precio</div>
+              </div>
+              <div>${priceInput}</div>
+            </div>
+            <div class="row-actions">
+              <label class="small">Cantidad</label>
+              <input type="number" min="0" value="0" class="quantity-box" id="qty-${i}">
+            </div>
+          </div>
+        `;
+      });
+
+      attachServiceEvents();
+      renderServiceSummary();
+    }
+
+    function attachServiceEvents() {
+      SERVICES.forEach((s, i) => {
+        const qty = document.getElementById(`qty-${i}`);
+        if (qty) qty.addEventListener("input", saveServicesAuto);
+
+        if (s.name === "Video") {
+          const vp = document.getElementById("videoPrice");
+          if (vp) vp.addEventListener("input", saveServicesAuto);
+        }
+      });
+    }
+
+    function getServiceSelection() {
+      return SERVICES.map((s, i) => {
+        const qty = parseInt(document.getElementById(`qty-${i}`)?.value || "0");
+        const price = s.name === "Video"
+          ? parseFloat(document.getElementById("videoPrice")?.value || "0")
+          : s.price;
+
+        return { name: s.name, quantity: qty, price: price };
+      }).filter(s => Number(s.quantity) > 0);
+    }
+
+    function saveServicesAuto() {
+      currentServiceData = getServiceSelection();
+      renderServiceSummary();
+    }
+
+    function guardarServicios() {
+      currentServiceData = getServiceSelection();
+      renderServiceSummary();
+      alert("Servicios guardados correctamente.");
+    }
+
+    function renderServiceSummary() {
+      const data = getServiceSelection();
+      const box = document.getElementById("serviceSummary");
+      if (!box) return;
+
+      if (data.length === 0) {
+        box.innerHTML = "Todavía no has guardado servicios.";
+        return;
+      }
+
+      const total = data.reduce((sum, s) => sum + (Number(s.price) * Number(s.quantity)), 0);
+      const text = data.map(s => `${s.name}: cantidad ${s.quantity}, precio ₡ ${s.price}`).join("<br>");
+
+      box.innerHTML = `
+        <strong>Servicios seleccionados:</strong><br>
+        ${text}<br><br>
+        <strong>Total provisional:</strong> ₡ ${total}
+      `;
+    }
+
+    function guardarFechas() {
+      currentDates = {
+        inicio: document.getElementById("fechaInicio").value,
+        final: document.getElementById("fechaFinal").value
+      };
+      alert("Fechas guardadas correctamente.");
+    }
+
+    function guardarCliente() {
+      if (!currentId) {
+        alert("Primero presiona 'Nuevo cliente'.");
+        return;
+      }
+
+      const nombre = document.getElementById("clienteNombre").value.trim();
+      const apellido = document.getElementById("clienteApellido").value.trim();
+      const telefono = document.getElementById("clienteTelefono").value.trim();
+      const descripcion = document.getElementById("clienteDescripcion").value.trim();
+
+      if (!nombre || !apellido || !telefono || !descripcion) {
+        alert("Completa todos los campos del cliente.");
+        return;
+      }
+
+      const serviceData = getServiceSelection();
+
+      if (serviceData.length === 0) {
+        alert("Debes seleccionar al menos un servicio.");
+        return;
+      }
+
+      const total = serviceData.reduce((sum, s) => sum + (Number(s.price) * Number(s.quantity)), 0);
+
+      clients.push({
+        id: currentId,
+        nombre,
+        apellido,
+        telefono,
+        descripcion,
+        serviceData: JSON.parse(JSON.stringify(serviceData)),
+        fechaInicio: document.getElementById("fechaInicio").value,
+        fechaFinal: document.getElementById("fechaFinal").value,
+        total: total,
+        createdAt: new Date().toISOString()
+      });
+
+      saveAll();
+      renderJobs();
+      alert("Cliente guardado correctamente.");
+
+      currentId = null;
+      currentServiceData = [];
+      resetClientForm();
+      clearServiceInputs();
+      document.getElementById("fechaInicio").value = "";
+      document.getElementById("fechaFinal").value = "";
+      renderServiceSummary();
+    }
+
+    function resetClientForm() {
+      document.getElementById("clienteId").value = "";
+      document.getElementById("clienteNombre").value = "";
+      document.getElementById("clienteApellido").value = "";
+      document.getElementById("clienteTelefono").value = "";
+      document.getElementById("clienteDescripcion").value = "";
+      document.getElementById("clienteNombre").disabled = true;
+      document.getElementById("clienteApellido").disabled = true;
+      document.getElementById("clienteTelefono").disabled = true;
+      document.getElementById("clienteDescripcion").disabled = true;
+    }
+
+    function clearServiceInputs() {
+      SERVICES.forEach((s, i) => {
+        const q = document.getElementById(`qty-${i}`);
+        if (q) q.value = 0;
+      });
+      const vp = document.getElementById("videoPrice");
+      if (vp) vp.value = 0;
+      const summary = document.getElementById("serviceSummary");
+      if (summary) summary.innerHTML = "Todavía no has guardado servicios.";
+    }
+
+    function renderJobs() {
+      const tbody = document.getElementById("jobsTable");
+      tbody.innerHTML = "";
+
+      if (clients.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8">No hay trabajos guardados.</td></tr>`;
+        return;
+      }
+
+      clients.forEach((c, index) => {
+        const serviceData = Array.isArray(c.serviceData) ? c.serviceData : [];
+        const total = Number(c.total ?? serviceData.reduce((sum, s) => sum + (Number(s.price) * Number(s.quantity)), 0));
+        const serviciosTexto = serviceData.length
+          ? serviceData.map(s => `${s.name} x${s.quantity} = ₡${Number(s.price) * Number(s.quantity)}`).join("<br>")
+          : "Sin servicio seleccionado";
+
+        const cantidadTotal = serviceData.reduce((sum, s) => sum + Number(s.quantity), 0);
+        const precioUnidad = serviceData.length
+          ? serviceData.map(s => `₡${s.price}`).join(", ")
+          : "-";
+
+        tbody.innerHTML += `
+          <tr oncontextmenu="deleteClient(event, ${index})">
+            <td>${c.id}</td>
+            <td>${c.nombre} ${c.apellido}</td>
+            <td>${serviciosTexto}</td>
+            <td>${cantidadTotal}</td>
+            <td>${precioUnidad}</td>
+            <td>₡ ${total.toFixed(2)}</td>
+            <td>${c.fechaInicio || "-"} / ${c.fechaFinal || "-"}</td>
+            <td><button class="btn btn-danger" onclick="deleteClientByButton(${index})">Eliminar</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function deleteClient(event, index) {
+      event.preventDefault();
+      if (confirm("¿Seguro que deseas eliminar este cliente definitivamente?")) {
+        clients.splice(index, 1);
+        saveAll();
+        renderJobs();
+      }
+    }
+
+    function deleteClientByButton(index) {
+      if (confirm("¿Seguro que deseas eliminar este cliente definitivamente?")) {
+        clients.splice(index, 1);
+        saveAll();
+        renderJobs();
+      }
+    }
+
+    window.onload = function() {
+      resetClientForm();
+      renderServices();
+      renderJobs();
+    };
+  </script>
+</body>
+</html>
